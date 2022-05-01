@@ -14,7 +14,7 @@ class MainPage extends StatefulWidget {
 }
 
 class _MainPageState extends State<MainPage> {
-  bool start = true;
+  bool start = false;
 
   moveToHome(BuildContext context) async {
     var db = await Mongo.Db.create(
@@ -24,11 +24,6 @@ class _MainPageState extends State<MainPage> {
 
     var collection = db.collection('water_info');
 
-    var res = await collection.updateOne(
-      Mongo.where.eq('name', 'rasberryPiMachine0'),
-      Mongo.ModifierBuilder().set('motor_status', start),
-    );
-
     var user = await collection.findOne();
     var stat;
     user!.forEach((key, value) {
@@ -36,8 +31,15 @@ class _MainPageState extends State<MainPage> {
         stat = value;
       }
     });
+
+    var res = await collection.updateOne(
+      Mongo.where.eq('name', 'rasberryPiMachine0'),
+      Mongo.ModifierBuilder().set('motor_status', !stat),
+    );
+
+    print(stat);
     setState(() {
-      start = stat;
+      start = !stat;
     });
   }
 
@@ -62,7 +64,7 @@ class _MainPageState extends State<MainPage> {
                 onPressed: () => moveToHome(context),
                 child: Padding(
                   padding: const EdgeInsets.all(4.0),
-                  child: start
+                  child: !start
                       ? Text(
                           "Start",
                           style: TextStyle(
